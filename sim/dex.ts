@@ -48,10 +48,10 @@ const dexes: {[mod: string]: ModdedDex} = Object.create(null);
 
 type DataType =
 	'Abilities' | 'Rulesets' | 'FormatsData' | 'Items' | 'Learnsets' | 'Moves' |
-	'Natures' | 'Pokedex' | 'Scripts' | 'Conditions' | 'TypeChart';
+	'Natures' | 'Pokedex' | 'Scripts' | 'Conditions' | 'TypeChart' | 'PokemonGoData';
 const DATA_TYPES: (DataType | 'Aliases')[] = [
 	'Abilities', 'Rulesets', 'FormatsData', 'Items', 'Learnsets', 'Moves',
-	'Natures', 'Pokedex', 'Scripts', 'Conditions', 'TypeChart',
+	'Natures', 'Pokedex', 'Scripts', 'Conditions', 'TypeChart', 'PokemonGoData',
 ];
 
 const DATA_FILES = {
@@ -64,6 +64,7 @@ const DATA_FILES = {
 	Moves: 'moves',
 	Natures: 'natures',
 	Pokedex: 'pokedex',
+	PokemonGoData: 'pokemongo',
 	Scripts: 'scripts',
 	Conditions: 'conditions',
 	TypeChart: 'typechart',
@@ -83,6 +84,7 @@ interface DexTableData {
 	Moves: DexTable<MoveData>;
 	Natures: DexTable<NatureData>;
 	Pokedex: DexTable<SpeciesData>;
+	PokemonGoData: DexTable<PokemonGoData>;
 	Scripts: DexTable<AnyObject>;
 	Conditions: DexTable<EffectData>;
 	TypeChart: DexTable<TypeData>;
@@ -122,6 +124,7 @@ export class ModdedDex {
 	textCache: TextTableData | null;
 
 	deepClone = Utils.deepClone;
+	deepFreeze = Utils.deepFreeze;
 
 	readonly formats: DexFormats;
 	readonly abilities: DexAbilities;
@@ -461,21 +464,27 @@ export class ModdedDex {
 			 'gen6xy',
 			 'gen7',
 			 'gen7letsgo',
+			 'gen7pokebilities',
 			 'gen7sm',
 			 'gen8',
 			 'gen8bdsp',
 			 'gen8dlc1',
-			 'gen8joltemons',
 			 'gen8linked',
+			 'gen9dlc1',
+			 'gen9predlc',
 			 'gennext',
 			 'mixandmega',
+			 'moderngen1',
 			 'partnersincrime',
 			 'pokebilities',
 			 'potd',
+			 'randomroulette',
 			 'sharedpower',
+			 'sharingiscaring',
 			 'ssb',
 			 'thecardgame',
 			 'trademarked',
+			 'vaporemons',
 			 CobblemonCache.MOD_ID
        	];
 		if (!this.isBase) throw new Error(`This must be called on the base Dex`);
