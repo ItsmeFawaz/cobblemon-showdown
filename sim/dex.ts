@@ -124,6 +124,7 @@ export class ModdedDex {
 	textCache: TextTableData | null;
 
 	deepClone = Utils.deepClone;
+	deepFreeze = Utils.deepFreeze;
 
 	readonly formats: DexFormats;
 	readonly abilities: DexAbilities;
@@ -455,7 +456,6 @@ export class ModdedDex {
 			 'gen2',
 			 'gen2stadium2',
 			 'gen3',
-			 'gen3hoenngaiden',
 			 'gen4',
 			 'gen4pt',
 			 'gen5',
@@ -469,11 +469,12 @@ export class ModdedDex {
 			 'gen8',
 			 'gen8bdsp',
 			 'gen8dlc1',
-			 'gen8joltemons',
 			 'gen8linked',
+			 'gen9dlc1',
 			 'gen9predlc',
 			 'gennext',
 			 'mixandmega',
+			 'moderngen1',
 			 'partnersincrime',
 			 'pokebilities',
 			 'potd',
@@ -483,6 +484,7 @@ export class ModdedDex {
 			 'ssb',
 			 'thecardgame',
 			 'trademarked',
+			 'vaporemons',
 			 CobblemonCache.MOD_ID
        	];
 		if (!this.isBase) throw new Error(`This must be called on the base Dex`);
