@@ -2559,7 +2559,8 @@ export class Battle {
 		switch (action.choice) {
 		case 'start': {
 			for (const side of this.sides) {
-				if (side.pokemonLeft) side.pokemonLeft = side.pokemon.length;
+				// COBBLED: exclude party mons that start fainted
+				if (side.pokemonLeft) side.pokemonLeft = side.pokemon.filter(pk => !pk.fainted).length;
 			}
 
 			this.add('start');
