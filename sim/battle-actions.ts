@@ -135,11 +135,10 @@ export class BattleActions {
 			moveSlot.used = false;
 		}
 		this.battle.runEvent('BeforeSwitchIn', pokemon);
-		if (sourceEffect) {
-			this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getDetails, '[from] ' + sourceEffect);
-		} else {
-			this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getDetails);
-		}
+		// COBBLED: send actual uuid as optional when disguised by illusion
+		var optionals = [sourceEffect ? `[from] ${ sourceEffect }` : null, pokemon.illusion ? `[is] ${ pokemon.uuid }` : null];
+		this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getDetails, ...(optionals.filter(Boolean)));
+		// ==================================
 		pokemon.abilityOrder = this.battle.abilityOrder++;
 		if (isDrag && this.battle.gen === 2) pokemon.draggedIn = this.battle.turn;
 		pokemon.previouslySwitchedIn++;

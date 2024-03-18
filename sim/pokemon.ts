@@ -1137,6 +1137,10 @@ export class Pokemon {
 			baseAbility: this.baseAbility,
 			item: this.item,
 			pokeball: this.pokeball,
+			// COBBLED: send types and baseTypes with request
+			baseTypes: this.baseTypes,
+			types: this.types,
+			// ==================================
 		};
 		if (this.battle.gen > 6) entry.ability = this.ability;
 		if (this.battle.gen >= 9) {
