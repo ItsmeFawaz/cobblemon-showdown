@@ -135,8 +135,8 @@ export class BattleActions {
 			moveSlot.used = false;
 		}
 		this.battle.runEvent('BeforeSwitchIn', pokemon);
-		// COBBLED: send actual uuid as optional when disguised by illusion
-		var optionals = [sourceEffect ? `[from] ${ sourceEffect }` : null, pokemon.illusion ? `[is] ${ pokemon.uuid }` : null];
+		// COBBLED: send uuid of disguise as optional (the actual uuid will be included in the first argument; see pokemon.toString)
+		var optionals = [sourceEffect ? `[from] ${ sourceEffect }` : null, pokemon.illusion ? `[is] ${ pokemon.illusion }` : null];
 		this.battle.add(isDrag ? 'drag' : 'switch', pokemon, pokemon.getDetails, ...(optionals.filter(Boolean)));
 		// ==================================
 		pokemon.abilityOrder = this.battle.abilityOrder++;

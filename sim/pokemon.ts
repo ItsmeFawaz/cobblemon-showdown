@@ -531,7 +531,9 @@ export class Pokemon {
 	}
 
 	toString() {
-		const fullname = (this.illusion) ? this.illusion.uuid : this.uuid;
+		// COBBLED: interpreter already acts as a middle-man that obfuscates illusion from clients so exposing actual uuids here is fine
+		const fullname = this.uuid;
+		// ==================================
 		return this.isActive ? this.getSlot() + ': ' + fullname : (this.side.id + ': ' + fullname);
 	}
 
