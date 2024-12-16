@@ -55,6 +55,10 @@ function getCobbledItemIds() {
 	return JSON.stringify(Dex.mod(cobbledModId).items.all().map(item => item.id));
 }
 
+function getTypeChart() {
+	return JSON.stringify(Dex.data.TypeChart);
+}
+
 function receiveSpeciesData(speciesArray) {
 	CobblemonCache.resetSpecies();
 	speciesArray.forEach((speciesJson) => {

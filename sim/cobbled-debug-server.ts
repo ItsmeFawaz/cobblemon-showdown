@@ -33,6 +33,8 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 			getCobbledAbilityIds(socket);
 		} else if (line === '>getCobbledItemIds') {
 			getCobbledItemIds(socket);
+		} else if (line == '>getTypeChart') {
+			getTypeChart(socket)
 		} else if (line === '>resetSpeciesData') {
 			CobblemonCache.resetSpecies();
 			socket.write('ACK');
@@ -51,7 +53,6 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 				console.error(e);
 				socket.write('ERR')
 			}
-			const bagItemJS = line.replace()
 		} else if (line === '>afterCobbledSpeciesInit') {
 			afterCobbledSpeciesInit();
 			socket.write('ACK');
@@ -112,6 +113,11 @@ function getCobbledAbilityIds(socket: Net.Socket) {
 
 function getCobbledItemIds(socket: Net.Socket) {
 	const payload = JSON.stringify(Dex.mod(cobbledModId).items.all().map(item => item.id));
+	socket.write(padNumber(payload.length, 8) + payload);
+}
+
+function getTypeChart(socket: Net.Socket) {
+	const payload = JSON.stringify(Dex.data.TypeChart);
 	socket.write(padNumber(payload.length, 8) + payload);
 }
 
