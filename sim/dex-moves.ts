@@ -1,5 +1,6 @@
 import {Utils} from '../lib';
 import {BasicEffect, toID} from './dex-data';
+import { Cobblemon } from './cobblemon/cobblemon';
 
 /**
  * Describes the acceptable target(s) of a move.
@@ -624,7 +625,7 @@ export class DexMoves {
 	}
 
 	getByID(id: ID): Move {
-		let move = this.moveCache.get(id);
+		let move = Cobblemon.moveRegistry.get(id) ?? this.moveCache.get(id);
 		if (move) return move;
 		if (this.dex.data.Aliases.hasOwnProperty(id)) {
 			move = this.get(this.dex.data.Aliases[id]);

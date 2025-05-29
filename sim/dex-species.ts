@@ -1,5 +1,5 @@
 import { toID, BasicEffect } from './dex-data';
-import * as CobblemonCache from './cobblemon-cache';
+import { Cobblemon } from './cobblemon/cobblemon';
 
 interface SpeciesAbility {
 	0: string;
@@ -368,7 +368,7 @@ export class DexSpecies {
 		return this.getByID(id);
 	}
 	getByID(id: ID): Species {
-		let species: Mutable<Species> | undefined = this.dex.currentMod === CobblemonCache.MOD_ID ? CobblemonCache.speciesByID(id) : this.speciesCache.get(id);
+		let species: Mutable<Species> | undefined = Cobblemon.speciesRegistry.get(id) ?? this.speciesCache.get(id);
 		if (species) return species;
 
 		if (this.dex.data.Aliases.hasOwnProperty(id)) {

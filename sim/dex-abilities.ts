@@ -1,3 +1,4 @@
+import { Cobblemon } from './cobblemon/cobblemon';
 import {PokemonEventMethods} from './dex-conditions';
 import {BasicEffect, toID} from './dex-data';
 
@@ -81,7 +82,7 @@ export class DexAbilities {
 	}
 
 	getByID(id: ID): Ability {
-		let ability = this.abilityCache.get(id);
+		let ability = Cobblemon.abilityRegistry.get(id) ?? this.abilityCache.get(id);
 		if (ability) return ability;
 
 		if (this.dex.data.Aliases.hasOwnProperty(id)) {
