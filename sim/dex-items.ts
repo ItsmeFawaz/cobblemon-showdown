@@ -1,3 +1,4 @@
+import { Cobblemon } from './cobblemon/cobblemon';
 import {PokemonEventMethods} from './dex-conditions';
 import {BasicEffect, toID} from './dex-data';
 
@@ -169,7 +170,7 @@ export class DexItems {
 	}
 
 	getByID(id: ID): Item {
-		let item = this.itemCache.get(id);
+		let item = Cobblemon.registries.heldItem.get(id) ?? this.itemCache.get(id);
 		if (item) return item;
 		if (this.dex.data.Aliases.hasOwnProperty(id)) {
 			item = this.get(this.dex.data.Aliases[id]);
@@ -208,10 +209,12 @@ export class DexItems {
 
 	all(): readonly Item[] {
 		if (this.allCache) return this.allCache;
-		const items = [];
-		for (const id in this.dex.data.Items) {
-			items.push(this.getByID(id as ID));
-		}
+		const allIds = [
+		    ...Object.keys(this.dex.data.Items),
+		    ...Cobblemon.registries.heldItem.contents.keys()
+		];
+		const uniqueIds = new Set<ID>(allIds as ID[]);
+		const items = Array.from(uniqueIds).map(id => this.getByID(id));
 		this.allCache = Object.freeze(items);
 		return this.allCache;
 	}

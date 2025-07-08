@@ -14,8 +14,8 @@ defined and configured, See ShowdownService.kt on the  main Cobblemon repo .
 
 // eslint-disable-next-line strict
 const BS = require('./sim/battle-stream');
-const Dex = require('./sim/dex').Dex;
 const Cobblemon = require('./sim/cobblemon/cobblemon').Cobblemon
+const Dex = require('./sim/dex').Dex;
 
 const battleMap = new Map();
 const toID = Dex.toID;
@@ -48,63 +48,51 @@ function sendBattleMessage(battleId, messages) {
 	}
 }
 
-function getAbilityIds() {
-	let combined = Array.from(Dex.mod(Cobblemon.modId).abilities.all());
-		Cobblemon.abilityRegistry.contents.forEach((ability, id) => {
-			let existing = combined.find((_ability) => _ability.id == id);
-			if (existing) {
-				combined[combined.indexOf(existing)] = ability;
-			} else {
-				combined.push(ability);
-			}
-		});
-	return JSON.stringify(combined.map(ability => ability.id));
-}
-
-function getHeldItemIds() {
-	return JSON.stringify(Dex.mod(Cobblemon.modId).items.all().map(item => item.id));
-}
-
-function getMoves() {
-	let combined = Array.from(Dex.mod(Cobblemon.modId).moves.all());
-	Cobblemon.moveRegistry.contents.forEach((move, id) => {
-		let existing = combined.find((_move) => _move.id == id);
-		if (existing) {
-			combined[combined.indexOf(existing)] = move;
-		} else {
-			combined.push(move);
-		}
-	});
-	const payload = JSON.stringify(combined);
-	return payload;
-}
-
 function getTypeChart() {
 	return JSON.stringify(Dex.data.TypeChart);
 }
 
-function receiveAbilityData(abilityId, ability) {
-	Cobblemon.abilityRegistry.register(ability, toID(abilityId));
+function resetData(type) {
+	const registry = Cobblemon.getRegistry(type);
+	registry.reset();
 }
 
-function receiveBagItemData(itemId, bagItem) {
-	Cobblemon.bagItemRegistry.register(bagItem, toID(itemId));
+function resetAll() {
+	for (const key of Cobblemon.registryKeys) {
+		Cobblemon.registries[key].reset();
+	}
 }
 
-function receiveHeldItemData(itemId, heldItem) {
-	Cobblemon.heldItemRegistry.register(heldItem, toID(itemId));
+function receiveData(data, type) {
+  const registry = Cobblemon.getRegistry(type);
+  const obj = () => { 
+	try {
+		// at the moment we only (re)serialize Species on the mod side, but prefer neat JSON first
+		return JSON.parse(data);
+	} catch {
+		// loose unstructured JS objects with embedded functions and stuff (abilities, moves, bag items, etc.)
+		return eval(`(${data})`);
+	}}
+  for (const [key, value] of Object.entries(obj())) {
+    registry.register(value, toID(key));
+  }
+  registry.invalidate();
 }
 
-function receiveMoveData(moveId, move) {
-	Cobblemon.moveRegistry.register(move, toID(moveId));
+function receiveEntry(data, type) {
+	const registry = Cobblemon.getRegistry(type);
+	registry.register(data, toID(key));
+	registry.invalidate();
 }
 
-function receiveSpeciesData(speciesArray) {
-	Cobblemon.speciesRegistry.reset();
-	speciesArray.forEach((speciesJson) => {
-		const speciesData = JSON.parse(speciesJson);
-		Cobblemon.speciesRegistry.register(speciesData);
-	});
+function invalidate(type) {
+	const registry = Cobblemon.getRegistry(type);
+	registry.invalidate();
+}
+
+function getData(type) {
+	const registry = Cobblemon.getRegistry(type);
+	return JSON.stringify(registry.all());
 }
 
 function afterSpeciesInit() {

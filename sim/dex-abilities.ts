@@ -82,7 +82,7 @@ export class DexAbilities {
 	}
 
 	getByID(id: ID): Ability {
-		let ability = Cobblemon.abilityRegistry.get(id) ?? this.abilityCache.get(id);
+		let ability = Cobblemon.registries.ability.get(id) ?? this.abilityCache.get(id);
 		if (ability) return ability;
 
 		if (this.dex.data.Aliases.hasOwnProperty(id)) {
@@ -116,11 +116,13 @@ export class DexAbilities {
 
 	all(): readonly Ability[] {
 		if (this.allCache) return this.allCache;
-		const abilities = [];
-		for (const id in this.dex.data.Abilities) {
-			abilities.push(this.getByID(id as ID));
-		}
-		this.allCache = abilities;
+		const allIds = [
+		    ...Object.keys(this.dex.data.Abilities),
+		    ...Cobblemon.registries.ability.contents.keys()
+		];
+		const uniqueIds = new Set<ID>(allIds as ID[]);
+		const abilities = Array.from(uniqueIds).map(id => this.getByID(id));
+		this.allCache = Object.freeze(abilities);
 		return this.allCache;
 	}
 }

@@ -2960,7 +2960,7 @@ export class Battle {
 		if (pokemonId === undefined) throw new Error(`Pokemon ID required for useitem`);
 		if (itemName === undefined) throw new Error('Item Name required for useitem')
 		if (itemId === undefined) throw new Error('Item ID required for useitem');
-		const item = Cobblemon.bagItemRegistry.get(toID(itemId));
+		const item = Cobblemon.registries.bagItem.get(toID(itemId));
 		if (!item) { throw new Error('Invalid item: ' + itemId); }
 		const pokemon = this.getPokemonById(pokemonId);
 		if (!pokemon) throw new Error(`No pokemon found for ID ${pokemonId}`);
