@@ -21,70 +21,70 @@ export function startServer(port: number): void {
 }
 
 function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, BattleStream>) {
-    const data = chunk.toString();
-    const lines = data.split('\n');
+	const data = chunk.toString();
+	const lines = data.split('\n');
 
-    lines.forEach(line => {
-        console.log('Data received from client: ' + line);
-        const parts = line.split(' ');
-        const command = parts[0];
+	lines.forEach(line => {
+		console.log('Data received from client: ' + line);
+		const parts = line.split(' ');
+		const command = parts[0];
 
-        switch (command) {
-            case '>startbattle': {
-                const battleId = parts[1];
-                if (battleId) {
-                    battleMap.set(battleId, new BattleStream());
-                    socket.write('ACK');
-                } else {
-                    console.error("Command '>startbattle' requires a battleId.");
-                    socket.write('ERR');
-                }
-                break;
-            }
-            case '>receiveData': {
+		switch (command) {
+			case '>startbattle': {
+				const battleId = parts[1];
+				if (battleId) {
+					battleMap.set(battleId, new BattleStream());
+					socket.write('ACK');
+				} else {
+					console.error("Command '>startbattle' requires a battleId.");
+					socket.write('ERR');
+				}
+				break;
+			}
+			case '>receiveData': {
 				const type = parts[1];
-                const registry = Cobblemon.getRegistry(type);
-                try {
+				const registry = Cobblemon.getRegistry(type);
+				try {
 					if (!registry) throw new Error();
 
-                    const data = line.substring(command.length + type.length + 2);
+					const data = line.substring(command.length + type.length + 2);
 					const obj = () => { 
 						try { return JSON.parse(data); } 
 						catch { return eval(`(${data})`); }
 					};
-                    for (const [key, value] of Object.entries(obj())) {
-    					registry.register(value as any, toID(key));
+					for (const [key, value] of Object.entries(obj())) {
+						registry.register(value as any, toID(key));
 					};
 					registry.invalidate();
 
-                    socket.write('ACK');
-                } catch (e) {
-                    console.error(`Error processing >receiveData for type ${type}:`, e);
-                    socket.write('ERR');
-                }
-                break;
-            }
+					socket.write('ACK');
+				} catch (e) {
+					console.error(`Error processing >receiveData for type ${type}:`, e);
+					socket.write('ERR');
+				}
+				break;
+			}
 			case '>receiveEntry': {
 				const type = parts[1];
-                const registry = Cobblemon.getRegistry(type);
-                try {
+				const registry = Cobblemon.getRegistry(type);
+				try {
 					if (!registry) throw new Error();
 
-                    const data = line.substring(command.length + type.length + 2);
+					const data = line.substring(command.length + type.length + 2);
 					const obj = () => { 
 						try { return JSON.parse(data); } 
 						catch { return eval(`(${data})`); }
 					};
-    				registry.register(obj());
+					registry.register(obj());
 					registry.invalidate();
 
-                    socket.write('ACK');
-                } catch (e) {
-                    console.error(`Error processing >receiveData for type ${type}:`, e);
-                    socket.write('ERR');
-                }
-                break;
-            }
+					socket.write('ACK');
+				} catch (e) {
+					console.error(`Error processing >receiveData for type ${type}:`, e);
+					socket.write('ERR');
+				}
+				break;
+			}
 			case '>getData': {
 				const type = parts[1];
 				var registry = Cobblemon.getRegistry(type);
@@ -95,7 +95,7 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 					socket.write(padNumber(payload.length, 16) + payload);
 				} catch (e) {
 					console.error(`Error processing >receiveData for type ${type}:`, e);
-                    socket.write('ERR');
+					socket.write('ERR');
 				}
 
 				break;
@@ -109,14 +109,14 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 				const type = parts[1];
 				var registry = Cobblemon.getRegistry(type);
 
-                try {
+				try {
 					if (!registry) throw new Error();
 					
 					registry.reset();
 					socket.write('ACK');
 				} catch (e) {
 					console.error(`Invalid registry type for >getData: ${type}`);
-                    socket.write('ERR');
+					socket.write('ERR');
 				}
 
 				break;
@@ -124,31 +124,31 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 			case '>getTypeChart': {
 				const payload = JSON.stringify(Dex.data.TypeChart);
 				socket.write(padNumber(payload.length, 8) + payload);
-                break;
+				break;
 			}
 			case '>afterSpeciesInit': {
 				Dex.modsLoaded = false;
 				Dex.includeMods();
-                socket.write('ACK');
+				socket.write('ACK');
 				break;
 			}
-            default: {
-                const [battleId, showdownMsg] = line.split('~');
-                const battleStream = battleMap.get(battleId);
+			default: {
+				const [battleId, showdownMsg] = line.split('~');
+				const battleStream = battleMap.get(battleId);
 
-                if (battleStream) {
-                    try {
-                        void battleStream.write(showdownMsg);
-                    } catch (err: any) {
-                        console.error(err.stack);
-                    }
-                    writeBattleOutput(socket, battleStream);
-                }
+				if (battleStream) {
+					try {
+					void battleStream.write(showdownMsg);
+					} catch (err: any) {
+						console.error(err.stack);
+					}
+					writeBattleOutput(socket, battleStream);
+				}
 
-                break;
-            }
-        }
-    });
+				break;
+			}
+		}
+	});
 }
 
 function writeBattleOutput(socket: Net.Socket, battleStream: BattleStream) {
