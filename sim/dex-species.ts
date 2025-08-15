@@ -1,5 +1,5 @@
 import { toID, BasicEffect } from './dex-data';
-import * as CobblemonCache from './cobblemon-cache';
+import { Cobblemon } from './cobblemon/cobblemon';
 
 interface SpeciesAbility {
 	0: string;
@@ -368,7 +368,7 @@ export class DexSpecies {
 		return this.getByID(id);
 	}
 	getByID(id: ID): Species {
-		let species: Mutable<Species> | undefined = this.dex.currentMod === CobblemonCache.MOD_ID ? CobblemonCache.speciesByID(id) : this.speciesCache.get(id);
+		let species: Mutable<Species> | undefined = Cobblemon.registries.species.get(id) ?? this.speciesCache.get(id);
 		if (species) return species;
 
 		if (this.dex.data.Aliases.hasOwnProperty(id)) {
@@ -672,10 +672,12 @@ export class DexSpecies {
 
 	all(): readonly Species[] {
 		if (this.allCache) return this.allCache;
-		const species = [];
-		for (const id in this.dex.data.Pokedex) {
-			species.push(this.getByID(id as ID));
-		}
+		const allIds = [
+		    ...Object.keys(this.dex.data.Pokedex),
+		    ...Cobblemon.registries.species.contents.keys()
+		];
+		const uniqueIds = new Set<ID>(allIds as ID[]);
+		const species = Array.from(uniqueIds).map(id => this.getByID(id));
 		this.allCache = Object.freeze(species);
 		return this.allCache;
 	}

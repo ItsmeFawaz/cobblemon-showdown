@@ -35,8 +35,8 @@ import {Item, DexItems} from './dex-items';
 import {Ability, DexAbilities} from './dex-abilities';
 import {Species, DexSpecies} from './dex-species';
 import {Format, DexFormats} from './dex-formats';
-import { Utils } from '../lib';
-import * as CobblemonCache from './cobblemon-cache';
+import {Utils} from '../lib';
+import {Cobblemon} from './cobblemon/cobblemon';
 
 const BASE_MOD = 'gen9' as ID;
 // to account for Sucrase
@@ -485,7 +485,7 @@ export class ModdedDex {
 			 'thecardgame',
 			 'trademarked',
 			 'vaporemons',
-			 CobblemonCache.MOD_ID
+			 Cobblemon.modId
        	];
 		if (!this.isBase) throw new Error(`This must be called on the base Dex`);
 		if (this.modsLoaded) return this;

@@ -25,7 +25,7 @@ import {State} from './state';
 import {BattleQueue, Action} from './battle-queue';
 import {BattleActions} from './battle-actions';
 import {Utils} from '../lib';
-import * as BagItems from './bag-items';
+import {Cobblemon} from './cobblemon/cobblemon';
 declare const __version: any;
 
 export type ChannelID = 0 | 1 | 2 | 3 | 4;
@@ -207,7 +207,7 @@ export class Battle {
 		this.format = format;
 		this.dex = Dex.forFormat(format);
 		// COBBLED ========
-		this.gen = options.format.gen || this.dex.gen;
+		this.gen = options.format?.gen || this.dex.gen;
 		// ==================================
 		this.ruleTable = this.dex.formats.getRuleTable(format);
 
@@ -2960,10 +2960,8 @@ export class Battle {
 		if (pokemonId === undefined) throw new Error(`Pokemon ID required for useitem`);
 		if (itemName === undefined) throw new Error('Item Name required for useitem')
 		if (itemId === undefined) throw new Error('Item ID required for useitem');
-		if (!BagItems.has(itemId)) {
-			throw new Error('Invalid item: ' + itemId); // Maybe throw an error or something idk
-		}
-		const item = BagItems.getItem(itemId);
+		const item = Cobblemon.registries.bagItem.get(toID(itemId));
+		if (!item) { throw new Error('Invalid item: ' + itemId); }
 		const pokemon = this.getPokemonById(pokemonId);
 		if (!pokemon) throw new Error(`No pokemon found for ID ${pokemonId}`);
 		if (this.ended) {
