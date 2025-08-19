@@ -92,7 +92,7 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 					if (!registry) throw new Error();
 
 					const payload = JSON.stringify(registry.all());
-					socket.write(padNumber(payload.length, 16) + payload);
+					socket.write(padNumber(payload.length, 8) + payload);
 				} catch (e) {
 					console.error(`Error processing >receiveData for type ${type}:`, e);
 					socket.write('ERR');
