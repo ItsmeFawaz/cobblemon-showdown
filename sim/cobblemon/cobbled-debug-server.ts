@@ -5,7 +5,7 @@ import {Cobblemon} from "./cobblemon";
 
 /*-----------------------------------------------------------------------------------------------------------------
 NOTE: The functions in this file are used by SocketShowdownService, the debug/remote Showdown environment. For the
-corresponding GraalShowdownService methods, see cobbled-index.js in this repo. 
+corresponding GraalShowdownService methods, see cobbled-index.js in this repo.
 See ShowdownService.kt for where the interface is defined and configured on the main Cobblemon repo.
 -----------------------------------------------------------------------------------------------------------------*/
 
@@ -48,8 +48,8 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 					if (!registry) throw new Error();
 
 					const data = line.substring(command.length + type.length + 2);
-					const obj = () => { 
-						try { return JSON.parse(data); } 
+					const obj = () => {
+						try { return JSON.parse(data); }
 						catch { return eval(`(${data})`); }
 					};
 					for (const [key, value] of Object.entries(obj())) {
@@ -70,12 +70,13 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 				try {
 					if (!registry) throw new Error();
 
-					const data = line.substring(command.length + type.length + 2);
-					const obj = () => { 
-						try { return JSON.parse(data); } 
+					const id = parts[2];
+					const data = line.substring(command.length + type.length + id.length + 2);
+					const obj = () => {
+						try { return JSON.parse(data); }
 						catch { return eval(`(${data})`); }
 					};
-					registry.register(obj());
+					registry.register(obj(), toID(id));
 					registry.invalidate();
 
 					socket.write('ACK');
@@ -111,7 +112,7 @@ function onData(socket: Net.Socket, chunk: Buffer, battleMap: Map<string, Battle
 
 				try {
 					if (!registry) throw new Error();
-					
+
 					registry.reset();
 					socket.write('ACK');
 				} catch (e) {

@@ -8,7 +8,7 @@
 
 /*-----------------------------------------------------------------------------------------------------------------
 NOTE: The functions in this file are used by GraalShowdownService, the default Showdown environment for Cobblemon.
-For the corresponding SocketShowdownService methods, see cobbled-debug-server.ts. For where the interface is 
+For the corresponding SocketShowdownService methods, see cobbled-debug-server.ts. For where the interface is
 defined and configured, See ShowdownService.kt on the  main Cobblemon repo .
 -----------------------------------------------------------------------------------------------------------------*/
 
@@ -65,7 +65,7 @@ function resetAll() {
 
 function receiveData(data, type) {
   const registry = Cobblemon.getRegistry(type);
-  const obj = () => { 
+  const obj = () => {
 	try {
 		// at the moment we only (re)serialize Species on the mod side, but prefer neat JSON first
 		return JSON.parse(data);
