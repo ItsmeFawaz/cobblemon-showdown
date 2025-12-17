@@ -6,6 +6,7 @@
 import {Ability} from "../dex-abilities";
 import {BagItem} from "./bag-item";
 import {DataMove, Move} from "../dex-moves";
+import {Item} from "../dex-items";
 import {Species} from "../dex-species";
 import {Dex} from "../dex";
 import {Cobblemon} from "./cobblemon";
@@ -44,33 +45,30 @@ export class AbilityRegistry extends CobbleRegistry<Ability> {
 	override all() { return Dex.mod(Cobblemon.modId).abilities.all(); }
 	invalidate() { Dex.mod(Cobblemon.modId).abilities.allCache = null; }
 	register(data: AnyObject, _id: ID) {
-		const raw = data as Mutable<Ability>;
-		raw.id = _id;
-		const abilityObj = new Ability(raw);
-		this.contents.set(_id, abilityObj);
-		return abilityObj;
+		if (!data.name) data.name = _id;
+		const ability = new Ability(data);
+		this.contents.set(ability.id, ability);
+		return ability;
 	}
 }
 
 export class BagItemRegistry extends CobbleRegistry<BagItem> {
 	invalidate() { return; }
 	register(data: AnyObject, _id: ID) {
-		const script = data as BagItem;
+		const script = data as BagItem;  // TODO: make BagItem a BasicEffect and part of Dex data
 		this.contents.set(_id, script);
 		return script;
 	}
 }
 
-// TODO: cobblemon-side implementation for datapacks etc.
 export class HeldItemRegistry extends CobbleRegistry<Item> {
 	override all() { return Dex.mod(Cobblemon.modId).items.all(); }
 	invalidate() { Dex.mod(Cobblemon.modId).items.allCache = null; }
 	register(data: AnyObject, _id: ID) {
-		const raw = data as Mutable<Item>;
-		raw.id = _id;
-		const itemObj = raw as Item;
-		this.contents.set(_id, itemObj);
-		return itemObj;
+		if (!data.name) data.name = _id;
+		const item = new Item(data);
+		this.contents.set(item.id, item);
+		return item;
 	}
 }
 
@@ -78,11 +76,10 @@ export class MoveRegistry extends CobbleRegistry<Move> {
 	override all() { return Dex.mod(Cobblemon.modId).moves.all(); }
 	invalidate() { Dex.mod(Cobblemon.modId).moves.allCache = null; }
 	register(data: AnyObject, _id: ID) {
-		const raw = data as Mutable<Move>;
-		raw.id = _id;
-		const moveObj = new DataMove(raw);
-		this.contents.set(_id, moveObj);
-		return moveObj;
+		if (!data.name) data.name = _id;
+		const move = new DataMove(data);
+		this.contents.set(move.id, move);
+		return move;
 	}
 }
 
