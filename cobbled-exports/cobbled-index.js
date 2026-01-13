@@ -41,6 +41,15 @@ function startBattle(graalShowdown, battleId, requestMessages) {
 	})();
 }
 
+function endBattle(battleId) {
+	const battleStream = battleMap.get(battleId);
+
+	if (battleStream != null) {
+		battleStream._writeEnd();
+		battleMap.delete(battleId);
+	}
+}
+
 function sendBattleMessage(battleId, messages) {
 	const battleStream = battleMap.get(battleId);
 	for (const element of messages) {
