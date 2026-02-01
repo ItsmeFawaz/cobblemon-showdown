@@ -2788,4 +2788,23 @@ export const Rulesets: {[k: string]: FormatData} = {
 		name: 'Useless Moves Clause',
 		// implemented in /mods/moderngen1/rulesets.ts
 	},
+	raiddenrule: {
+		effectType: 'Rule',
+		name: 'Raid Den Rule',
+		desc: `Configures battle for Raid Den mechanics where multiple participants battle against one boss Pokemon.`,
+		// Configuration for raid den battles
+		// These will be set by the format or when initializing the battle
+		onBegin() {
+			// Initialize raid den specific state
+			if (!this.raidDenConfig) {
+				this.raidDenConfig = {
+					maxTurns: 10,
+					bossMinMoves: 1,
+					bossMaxMoves: 3,
+					participantCount: 3,
+				};
+			}
+			this.add('rule', `Raid Den Rule: Max ${this.raidDenConfig.maxTurns} turns, Boss makes ${this.raidDenConfig.bossMinMoves}-${this.raidDenConfig.bossMaxMoves} moves per turn`);
+		},
+	},
 };

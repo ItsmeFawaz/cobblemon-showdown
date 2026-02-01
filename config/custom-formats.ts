@@ -51,4 +51,12 @@ export const Formats: FormatList = [
 		ruleset: [],
 		gameType: "freeforall"
 	},
+	{
+		name: "Cobblemon Raid Den",
+		threads: [],
+
+		mod: 'cobblemon',
+		ruleset: ['Raid Den Rule'],
+		gameType: "singles"
+	},
 ];
