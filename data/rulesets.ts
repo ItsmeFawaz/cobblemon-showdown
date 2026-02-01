@@ -2792,19 +2792,17 @@ export const Rulesets: {[k: string]: FormatData} = {
 		effectType: 'Rule',
 		name: 'Raid Den Rule',
 		desc: `Configures battle for Raid Den mechanics where multiple participants battle against one boss Pokemon.`,
-		// Configuration for raid den battles
-		// These will be set by the format or when initializing the battle
 		onBegin() {
-			// Initialize raid den specific state
-			if (!this.raidDenConfig) {
-				this.raidDenConfig = {
-					maxTurns: 10,
-					bossMinMoves: 1,
-					bossMaxMoves: 3,
-					participantCount: 3,
-				};
-			}
-			this.add('rule', `Raid Den Rule: Max ${this.raidDenConfig.maxTurns} turns, Boss makes ${this.raidDenConfig.bossMinMoves}-${this.raidDenConfig.bossMaxMoves} moves per turn`);
+			// Initialize raid den specific state in battle formatData
+			this.formatData.raidDenConfig = {
+				maxTurns: 10,
+				bossMinMoves: 1,
+				bossMaxMoves: 3,
+			};
+			this.formatData.raidDenBossMoveCount = 0;
+			this.formatData.raidDenBossMovesThisTurn = 0;
+			
+			this.add('rule', `Raid Den Rule: Max ${this.formatData.raidDenConfig.maxTurns} turns, Boss makes ${this.formatData.raidDenConfig.bossMinMoves}-${this.formatData.raidDenConfig.bossMaxMoves} moves per turn`);
 		},
 	},
 };
