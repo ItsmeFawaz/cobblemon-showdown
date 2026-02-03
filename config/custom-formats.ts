@@ -57,6 +57,6 @@ export const Formats: FormatList = [
 
 		mod: 'cobblemon',
 		ruleset: ['Raid Den Rule'],
-		gameType: "singles"
+		gameType: "singles",
 	},
 ];

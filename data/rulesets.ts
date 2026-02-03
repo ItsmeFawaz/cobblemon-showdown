@@ -2793,16 +2793,174 @@ export const Rulesets: {[k: string]: FormatData} = {
 		name: 'Raid Den Rule',
 		desc: `Configures battle for Raid Den mechanics where multiple participants battle against one boss Pokemon.`,
 		onBegin() {
-			// Initialize raid den specific state in battle formatData
+			// Initialize raid den config with defaults
+			// These can be overridden by setting battle.formatData properties before battle starts
+			// or by modifying the format definition
+			const maxTurns = 10;
+			const bossMinMoves = 1;
+			const bossMaxMoves = 3;
+			const participantCount = 3;
+			
+			// Store in formatData for access during battle
 			this.formatData.raidDenConfig = {
-				maxTurns: 10,
-				bossMinMoves: 1,
-				bossMaxMoves: 3,
+				maxTurns,
+				bossMinMoves,
+				bossMaxMoves,
+				participantCount,
 			};
 			this.formatData.raidDenBossMoveCount = 0;
 			this.formatData.raidDenBossMovesThisTurn = 0;
+			this.formatData.raidDenMode = true;
 			
-			this.add('rule', `Raid Den Rule: Max ${this.formatData.raidDenConfig.maxTurns} turns, Boss makes ${this.formatData.raidDenConfig.bossMinMoves}-${this.formatData.raidDenConfig.bossMaxMoves} moves per turn`);
+			this.add('rule', `Raid Den Rule: ${participantCount} participants vs 1 boss, Max ${maxTurns} turns, Boss makes ${bossMinMoves}-${bossMaxMoves} moves per turn`);
+		},
+		// Hook after each move to queue additional boss moves
+		onAfterMove(source, target, move) {
+			if (!this.formatData.raidDenMode) return;
+			if (source.side.id !== 'p2') return; // Only for boss
+			
+			// Check if this is the first boss move this turn
+			if (!this.formatData.raidDenBossMoveCount) {
+				const config = this.formatData.raidDenConfig;
+				this.formatData.raidDenBossMovesThisTurn = this.random(
+					config.bossMaxMoves - config.bossMinMoves + 1
+				) + config.bossMinMoves;
+				this.formatData.raidDenBossMoveCount = 0;
+			}
+			
+			this.formatData.raidDenBossMoveCount++;
+			
+			// Queue additional moves if needed
+			if (this.formatData.raidDenBossMoveCount < this.formatData.raidDenBossMovesThisTurn && !source.fainted) {
+				const participantsAlive = this.sides[0].active.filter((p: any) => p && !p.fainted);
+				if (participantsAlive.length > 0) {
+					const possibleMoves = source.getMoves().filter((m: any) => !m.disabled);
+					if (possibleMoves.length > 0) {
+						const randomMove = this.sample(possibleMoves);
+						const randomTarget = this.sample(participantsAlive);
+						
+						// Queue next boss move
+						this.queue.unshift({
+							choice: 'move',
+							order: 200,
+							priority: 0,
+							speed: source.speed,
+							pokemon: source,
+							targetLoc: randomTarget.getLocOf(source),
+							moveid: randomMove.id,
+						} as any);
+					}
+				}
+			}
+		},
+		// Hook at end of turn for cleanup and revival
+		onResidual(pokemon) {
+			if (!this.formatData.raidDenMode) return;
+			
+			// Only run once per turn (check on first pokemon)
+			if (pokemon !== this.getAllActive()[0]) return;
+			
+			// Reset move counter for next turn
+			this.formatData.raidDenBossMoveCount = 0;
+			this.formatData.raidDenBossMovesThisTurn = 0;
+			
+			// Clear boss status and debuffs
+			for (const bossPokemon of this.sides[1].active) {
+				if (bossPokemon && !bossPokemon.fainted) {
+					// Clear status
+					if (bossPokemon.status) {
+						this.add('-curestatus', bossPokemon, bossPokemon.status, '[silent]');
+						bossPokemon.setStatus('');
+						this.add('-message', `${bossPokemon.name}'s status was healed!`);
+					}
+					
+					// Reset negative boosts
+					let hasDebuffs = false;
+					const boosts: Partial<BoostsTable> = {};
+					for (const stat in bossPokemon.boosts) {
+						if (bossPokemon.boosts[stat as BoostID] < 0) {
+							boosts[stat as BoostID] = -bossPokemon.boosts[stat as BoostID];
+							hasDebuffs = true;
+						}
+					}
+					if (hasDebuffs) {
+						this.boost(boosts, bossPokemon);
+						this.add('-message', `${bossPokemon.name}'s stat drops were reset!`);
+					}
+				}
+			}
+			
+			// Reset participant positive boosts
+			for (const participant of this.sides[0].active) {
+				if (participant && !participant.fainted) {
+					let hasBuffs = false;
+					const boosts: Partial<BoostsTable> = {};
+					for (const stat in participant.boosts) {
+						if (participant.boosts[stat as BoostID] > 0) {
+							boosts[stat as BoostID] = -participant.boosts[stat as BoostID];
+							hasBuffs = true;
+						}
+					}
+					if (hasBuffs) {
+						this.boost(boosts, participant);
+						this.add('-message', `${participant.name}'s stat boosts were reset!`);
+					}
+				}
+			}
+			
+			// REVIVE FAINTED PARTICIPANTS (NEW MECHANIC)
+			// Check if any participants are fainted but not all
+			const allParticipants = this.sides[0].pokemon;
+			const faintedParticipants = allParticipants.filter(p => p.fainted);
+			const aliveParticipants = allParticipants.filter(p => !p.fainted);
+			
+			// Only revive if at least one participant is still alive
+			if (aliveParticipants.length > 0 && faintedParticipants.length > 0) {
+				for (const faintedPokemon of faintedParticipants) {
+					// Revive the pokemon
+					faintedPokemon.fainted = false;
+					faintedPokemon.faintQueued = false;
+					faintedPokemon.subFainted = false;
+					faintedPokemon.status = '';
+					faintedPokemon.hp = 1; // Revive with minimal HP
+					faintedPokemon.sethp(Math.floor(faintedPokemon.maxhp * 0.5)); // Revive at 50% HP
+					
+					this.add('-heal', faintedPokemon, faintedPokemon.getHealth, '[silent]');
+					this.add('-message', `${faintedPokemon.name} was revived!`);
+					
+					// Update side's pokemon count
+					faintedPokemon.side.pokemonLeft++;
+				}
+			}
+		},
+		onFaint(pokemon) {
+			if (!this.formatData.raidDenMode) return;
+			
+			// Check win conditions
+			// Boss fainted - participants win
+			if (pokemon.side.id === 'p2') {
+				this.add('-message', 'The raid boss has been defeated!');
+				this.win(this.sides[0]);
+				return;
+			}
+			
+			// Check if all participants fainted - boss wins
+			const allParticipantsFainted = this.sides[0].pokemon.every(p => p.fainted);
+			if (allParticipantsFainted) {
+				this.add('-message', 'All participants have fainted! Boss wins!');
+				this.win(this.sides[1]);
+				return;
+			}
+		},
+		onBeforeTurn() {
+			if (!this.formatData.raidDenMode) return;
+			
+			// Check max turns
+			const config = this.formatData.raidDenConfig;
+			if (this.turn >= config.maxTurns) {
+				this.add('-message', `Max turns (${config.maxTurns}) reached! Boss wins!`);
+				this.win(this.sides[1]);
+			}
 		},
 	},
 };
