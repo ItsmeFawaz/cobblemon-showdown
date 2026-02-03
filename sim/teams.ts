@@ -164,13 +164,13 @@ export const Teams = new class Teams {
 			buf += '|' + (set.uuid || '');
 
 			// COBBLED: currentHealth
-			buf += '|' + (set.currentHealth !== undefined ? set.currentHealth : '');
+			buf += '|' + (set.currentHealth !== undefined && !isNaN(set.currentHealth) ? set.currentHealth : '');
 
 			// COBBLED: status
 			buf += '|' + (set.status || '');
 
 			// COBBLED: statusDuration
-			buf += '|' + (set.statusDuration !== undefined ? set.statusDuration : '');
+			buf += '|' + (set.statusDuration !== undefined && !isNaN(set.statusDuration) ? set.statusDuration : '');
 
 			// item
 			buf += '|' + this.packName(set.item);
@@ -183,7 +183,14 @@ export const Teams = new class Teams {
 
 			// COBBLED: movesInfo
 			if (set.movesInfo && set.movesInfo.length > 0) {
-				buf += '|' + set.movesInfo.map(info => `${info.pp}/${info.maxPp}`).join(',');
+				const validMovesInfo = set.movesInfo.filter(info => 
+					info && !isNaN(info.pp) && !isNaN(info.maxPp)
+				);
+				if (validMovesInfo.length > 0) {
+					buf += '|' + validMovesInfo.map(info => `${info.pp}/${info.maxPp}`).join(',');
+				} else {
+					buf += '|';
+				}
 			} else {
 				buf += '|';
 			}

@@ -154,7 +154,9 @@ JSON format looks like this:
 Packed format
 -------------
 
-Packed format looks like this:
+**Note: Cobblemon Showdown uses an extended packed format with additional fields for game state.**
+
+Standard Pokémon Showdown packed format looks like this:
 
 ```
 Articuno||leftovers|pressure|icebeam,hurricane,substitute,roost|Modest|252,,,252,4,||,,,30,30,|||]
@@ -169,16 +171,32 @@ Armaldo||leftovers|swiftswim|xscissor,stoneedge,aquatail,rapidspin|Adamant|128,2
 
 The format is a list of pokemon delimited by `]`, where every Pokémon is:
 
+**Standard format:**
 ```
 NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,POKEBALL,HIDDENPOWERTYPE,GIGANTAMAX,DYNAMAXLEVEL,TERATYPE
 ```
 
+**Cobblemon extended format:**
+```
+NICKNAME|SPECIES|UUID|CURRENTHEALTH|STATUS|STATUSDURATION|ITEM|ABILITY|MOVES|MOVESINFO|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,POKEBALL,HIDDENPOWERTYPE,GIGANTAMAX,DYNAMAXLEVEL,TERATYPE
+```
+
 - `SPECIES` is left blank if it's identical to `NICKNAME`
+
+- `UUID` **(Cobblemon)** is the unique identifier for the Pokemon from the mod. Left blank if not specified.
+
+- `CURRENTHEALTH` **(Cobblemon)** is the current HP of the Pokemon. Left blank if not specified.
+
+- `STATUS` **(Cobblemon)** is the current status condition (par, brn, psn, tox, slp, frz). Left blank if no status.
+
+- `STATUSDURATION` **(Cobblemon)** is the duration/counter for the status condition. Left blank if no status.
 
 - `ABILITY` is `0`, `1`, or `H` if it's the ability from the corresponding slot
   for the Pokémon. It can also be an ability string, for Hackmons etc.
 
 - `MOVES` is a comma-separated list of move IDs.
+
+- `MOVESINFO` **(Cobblemon)** is a comma-separated list of move PP data in format `pp/maxPp` (e.g. `15/15,30/30,15/15,15/15`). Left blank if not specified.
 
 - `NATURE` left blank means Serious, except in Gen 1-2, where it means no Nature.
 
@@ -214,6 +232,11 @@ NICKNAME|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS,
 
 - If `POKEBALL`, `HIDDENPOWERTYPE`, `GIGANTAMAX`, `DYNAMAXLEVEL` and `TERATYPE`
   are all blank, the commas will be left off.
+
+**Example Cobblemon packed format:**
+```
+Pikachu||test-uuid-123|100|par|3|LightBall|Static|Thunderbolt,QuickAttack,IronTail,VoltTackle|15/15,30/30,15/15,15/15|Jolly|252,252,,,4,|M|||50|
+```
 
 
 Converting between formats
