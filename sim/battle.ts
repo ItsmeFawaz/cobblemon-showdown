@@ -123,7 +123,7 @@ export class Battle {
 	 * The number of active pokemon per half-field.
 	 * See header comment in side.ts for details.
 	 */
-	readonly activePerHalf: 1 | 2 | 3;
+	readonly activePerHalf: 1 | 2 | 3 | 5;
 	readonly field: Field;
 	readonly sides: [Side, Side] | [Side, Side, Side, Side];
 	readonly prngSeed: PRNGSeed;
@@ -232,6 +232,7 @@ export class Battle {
 		this.field = new Field(this);
 		this.sides = Array(format.playerCount).fill(null) as any;
 		this.activePerHalf = this.gameType === 'triples' ? 3 :
+			this.gameType === 'raid' ? 5 :
 			(format.playerCount > 2 || this.gameType === 'doubles') ? 2 :
 			1;
 		this.prng = options.prng || new PRNG(options.seed || undefined);
@@ -2255,6 +2256,26 @@ export class Battle {
 		if (Math.abs(targetLoc) > numSlots) return false;
 		const isSelf = (sourceLoc === targetLoc);
 		const isFoe = (this.gameType === 'freeforall' ? !isSelf : targetLoc > 0);
+
+		// In raid battles the field is asymmetric (1 boss vs 5 players), so all
+		// cross-side positions are always considered adjacent to one another.
+		if (this.gameType === 'raid') {
+			switch (targetType) {
+			case 'randomNormal':
+			case 'scripted':
+			case 'normal':
+			case 'adjacentFoe':
+				return isFoe && !isSelf;
+			case 'adjacentAlly':
+				return !isFoe && !isSelf;
+			case 'adjacentAllyOrSelf':
+				return !isFoe;
+			case 'any':
+				return !isSelf;
+			}
+			return false;
+		}
+
 		const acrossFromTargetLoc = -(numSlots + 1 - targetLoc);
 		const isAdjacent = (targetLoc > 0 ?
 			Math.abs(acrossFromTargetLoc - sourceLoc) <= 1 :

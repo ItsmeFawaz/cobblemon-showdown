@@ -128,6 +128,11 @@ export class Side {
 		case 'triples': case 'rotation':
 			this.active = [null!, null!, null!];
 			break;
+		case 'raid':
+			// Side 0 is the boss with 1 active slot; side 1 is the player side
+			// with 5 active slots (one per player).
+			this.active = new Array(sideNum === 0 ? 1 : 5).fill(null!) as Pokemon[];
+			break;
 		default:
 			this.active = [null!];
 		}
