@@ -188,7 +188,9 @@ The battle stream accepts text commands prefixed with `>`.  All commands end wit
 
 #### `>start OPTIONS`
 
-`OPTIONS` is a JSON object:
+`OPTIONS` is a JSON object.  There are **two supported styles**:
+
+**Style A – registered format name (recommended)**
 
 ```json
 {
@@ -203,6 +205,30 @@ The battle stream accepts text commands prefixed with `>`.  All commands end wit
 | `seed` | `number[4]` | No | PRNG seed for deterministic replays.  Omit for random seed. |
 | `p1` | `PLAYEROPTIONS` | No | Can be inlined; see `>player` below |
 | `p2` | `PLAYEROPTIONS` | No | Can be inlined; see `>player` below |
+
+**Style B – inline format definition**
+
+Pass the format properties directly at the top level of `OPTIONS`.  This is useful when the format is built dynamically on the client side without relying on a server-side format registry entry.
+
+```json
+{
+  "mod": "cobblemon",
+  "gameType": "raid",
+  "gen": 9,
+  "ruleset": ["Cobblemon Raid Rule"],
+  "effectType": "Format",
+  "seed": [12345, 67890, 11111, 22222]
+}
+```
+
+| Property | Type | Required | Notes |
+|---|---|---|---|
+| `effectType` | `"Format"` | **Yes** | Tells the engine to treat `OPTIONS` as an inline format definition |
+| `mod` | `string` | **Yes** | Must be `"cobblemon"` |
+| `gameType` | `"raid"` | **Yes** | Selects the raid field layout (1 boss slot + 5 challenger slots) |
+| `ruleset` | `string[]` | **Yes** | Must include `"Cobblemon Raid Rule"` for boss multi-move and end-of-round effects |
+| `gen` | `number` | No | Generation number (default: `9`) |
+| `seed` | `number[4]` | No | PRNG seed |
 
 #### `>player PLAYERID PLAYEROPTIONS`
 
@@ -224,10 +250,20 @@ The battle stream accepts text commands prefixed with `>`.  All commands end wit
 | `avatar` | `string` | Avatar identifier (cosmetic) |
 | `team` | `string` | Cobblemon packed team (see §3) |
 
-#### Full start example
+#### Full start examples
+
+**Style A (formatid)**
 
 ```
 >start {"formatid":"cobblemonraid","seed":[1000,2000,3000,4000]}
+>player p1 {"name":"Raid Boss","team":"Charizard||abc-uuid-001|340||0|charcoal|blaze|flamethrower,earthquake,airslash,roost|16/16,10/10,24/24,8/8|Modest|4,,,252,,252||,,,30,,30||50|"}
+>player p2 {"name":"Challengers","team":"Pikachu||pid-001|200||0|lightball|static|thunderbolt,quickattack,ironhead,voltswitch|16/16,30/30,8/8,24/24|Hardy||M||||50|]Bulbasaur||pid-002|185||0||overgrow|vinewhip,leechseed,synthesis,sludgebomb|25/25,15/15,8/8,16/16|Bold|252,,252,,,4||||||]Squirtle||pid-003|220||0|mysticwater|torrent|watergun,icebeam,aquatail,protect|16/16,8/8,16/16,16/16|Calm|252,,4,,252,||||||]Charmander||pid-004|165||0||blaze|ember,scratch,growl,smokescreen|16/16,30/30,35/35,30/30|Naive||||F|||45|]Caterpie||pid-005|105||0||shielddust|tackle,stringshot|25/25,20/20|Hardy||||||25|"}
+```
+
+**Style B (inline format)**
+
+```
+>start {"mod":"cobblemon","gameType":"raid","gen":9,"ruleset":["Cobblemon Raid Rule"],"effectType":"Format","seed":[1000,2000,3000,4000]}
 >player p1 {"name":"Raid Boss","team":"Charizard||abc-uuid-001|340||0|charcoal|blaze|flamethrower,earthquake,airslash,roost|16/16,10/10,24/24,8/8|Modest|4,,,252,,252||,,,30,,30||50|"}
 >player p2 {"name":"Challengers","team":"Pikachu||pid-001|200||0|lightball|static|thunderbolt,quickattack,ironhead,voltswitch|16/16,30/30,8/8,24/24|Hardy||M||||50|]Bulbasaur||pid-002|185||0||overgrow|vinewhip,leechseed,synthesis,sludgebomb|25/25,15/15,8/8,16/16|Bold|252,,252,,,4||||||]Squirtle||pid-003|220||0|mysticwater|torrent|watergun,icebeam,aquatail,protect|16/16,8/8,16/16,16/16|Calm|252,,4,,252,||||||]Charmander||pid-004|165||0||blaze|ember,scratch,growl,smokescreen|16/16,30/30,35/35,30/30|Naive||||F|||45|]Caterpie||pid-005|105||0||shielddust|tackle,stringshot|25/25,20/20|Hardy||||||25|"}
 ```

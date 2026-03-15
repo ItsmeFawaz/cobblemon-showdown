@@ -195,19 +195,26 @@ export class Battle {
 		this.add('t:', Math.floor(Date.now() / 1000));
 
 		// COBBLED ========
-		let format = undefined
+		const optionsAny = options as AnyObject;
+		let format = undefined;
 		if (!!options.format && options.format.debug == undefined) {
 			// This is a format that was given as a loose object, needs to be ratified to a proper object
 			format = new Format(options.format);
-			// ==================================
+		} else if (!options.format && !options.formatid && optionsAny.effectType === 'Format') {
+			// Format properties were passed at the top level of options (e.g. from >start {...})
+			// rather than nested under options.format.  Wrap them into a proper Format so that
+			// gameType, mod, ruleset, etc. are all applied correctly.
+			format = new Format(optionsAny);
 		} else {
 			format = options.format || Dex.formats.get(options.formatid, true);
 		}
+		// ==================================
 
 		this.format = format;
 		this.dex = Dex.forFormat(format);
 		// COBBLED ========
-		this.gen = options.format?.gen || this.dex.gen;
+		// Read gen from (in priority order): options.format, top-level options, the resolved dex.
+		this.gen = options.format?.gen || optionsAny.gen || this.dex.gen;
 		// ==================================
 		this.ruleTable = this.dex.formats.getRuleTable(format);
 
