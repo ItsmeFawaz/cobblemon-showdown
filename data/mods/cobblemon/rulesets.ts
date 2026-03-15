@@ -6,6 +6,33 @@ export const Rulesets: {[k: string]: FormatData} = {
 		desc: "Rules for Cobblemon Raid battles: 1 boss vs 5 player Pokémon.",
 
 		/**
+		 * Overrides the battle's win-condition logic so that player Pokémon fainting
+		 * mid-round does NOT immediately trigger a boss victory.  Instead, the real
+		 * end-of-round check is done inside onResidual (which also revives challengers).
+		 *
+		 * This fires for EVERY way the format can be specified — registered formatid,
+		 * nested `format` object, or flat top-level `>start` properties — because
+		 * onBegin is called unconditionally for every active ruleset entry.
+		 */
+		onBegin() {
+			if (this.gameType !== 'raid') return;
+			// Use the same Object.assign pattern as format.battle in custom-formats.ts so
+			// the override is typed via ModdedBattleScriptsData rather than AnyObject.
+			Object.assign(this, {
+				checkWin(this: Battle) {
+					// Challengers win immediately if the boss faints.
+					if (!this.sides[0].pokemonLeft) {
+						this.win(this.sides[1]);
+						return true as const;
+					}
+					// Challenger faint/revive is handled by onResidual; suppress the
+					// default "all on one side fainted → other side wins" logic.
+					return undefined;
+				},
+			} as ModdedBattleScriptsData);
+		},
+
+		/**
 		 * Runs once per active Pokémon at the start of each turn (BeforeTurn event).
 		 *
 		 * - Resets the per-turn residual-done guard (using the boss Pokémon's event so it
