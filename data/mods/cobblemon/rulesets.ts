@@ -31,7 +31,8 @@ export const Rulesets: {[k: string]: FormatData} = {
 			if (!playerActives.length) return;
 
 			// Add 1–3 extra boss moves so the boss uses 2–4 moves per round total.
-			const extraCount = this.random(1, 4); // 1, 2 or 3 extra moves
+			// this.random(1, 4) returns an integer in [1, 4) → 1, 2, or 3 extra moves.
+			const extraCount = this.random(1, 4);
 			for (let i = 0; i < extraCount; i++) {
 				const validMoves = pokemon.moveSlots.filter(slot => slot.pp > 0);
 				if (!validMoves.length) break;
