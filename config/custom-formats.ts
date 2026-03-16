@@ -67,12 +67,15 @@ export const Formats: FormatList = [
 		// performs the real check and heals fainted players at the end of every round.
 		battle: {
 			checkWin(faintData?: Battle['faintQueue'][0]) {
+				// Boss side has exactly 1 active slot; challenger side has 5.
+				const bossSide = this.sides.find(s => s.active.length === 1);
+				const challengerSide = this.sides.find(s => s.active.length > 1);
 				// Players win immediately if the boss faints.
-				if (!this.sides[0].pokemonLeft) {
-					this.win(this.sides[1]);
+				if (bossSide && !bossSide.pokemonLeft) {
+					this.win(challengerSide!);
 					return true;
 				}
-				// Challenger win-loss is handled in onFieldResidual; suppress the
+				// Challenger win-loss is handled in onResidual; suppress the
 				// default "all on one side fainted → other side wins" check.
 				return undefined;
 			},

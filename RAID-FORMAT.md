@@ -16,7 +16,8 @@ This document is the authoritative reference for integrating the **Cobblemon Rai
 
 ## 1. Format overview
 
-The **Cobblemon Raid** format (`cobblemonraid`) pits **one Raid Boss player (p1)** against **five Challenger players (p2)**.
+The **Cobblemon Raid** format (`cobblemonraid`) pits **one Raid Boss player** against **five Challenger players**.
+The boss and challengers can join as either p1 or p2 — the simulator detects which side is the boss by team size (1 Pokémon = boss).
 
 | Property | Value |
 |---|---|
@@ -27,8 +28,8 @@ The **Cobblemon Raid** format (`cobblemonraid`) pits **one Raid Boss player (p1)
 
 ### Core rules
 
-* **Boss side (p1)** — brings exactly **1 Pokémon** (the Raid Boss).
-* **Player side (p2)** — brings exactly **5 Pokémon**, one per challenger.  
+* **Boss side** — brings exactly **1 Pokémon** (the Raid Boss). Can be p1 or p2.
+* **Player side** — brings exactly **5 Pokémon**, one per challenger. Can be p1 or p2.  
   From the simulator's perspective this is a single team sent as p2's team string.
 * **Each round (turn)**:
   * Every challenger Pokémon submits **1 move**.
@@ -232,7 +233,7 @@ Pass the format properties directly at the top level of `OPTIONS`.  This is usef
 
 #### `>player PLAYERID PLAYEROPTIONS`
 
-`PLAYERID` is `p1` (boss) or `p2` (challengers).
+`PLAYERID` is `p1` or `p2`; either can be the boss (1 Pokémon) or the challengers (5 Pokémon).
 
 `PLAYEROPTIONS` is a JSON object:
 

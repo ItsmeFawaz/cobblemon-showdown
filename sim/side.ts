@@ -129,9 +129,9 @@ export class Side {
 			this.active = [null!, null!, null!];
 			break;
 		case 'raid':
-			// Side 0 is the boss with 1 active slot; side 1 is the player side
-			// with 5 active slots (one per player).
-			this.active = new Array(sideNum === 0 ? 1 : 5).fill(null!) as Pokemon[];
+			// The boss brings exactly 1 Pokémon; the challenger side brings 5.
+			// Detect by team size so the boss can be either p1 or p2.
+			this.active = new Array(team.length === 1 ? 1 : 5).fill(null!) as Pokemon[];
 			break;
 		default:
 			this.active = [null!];

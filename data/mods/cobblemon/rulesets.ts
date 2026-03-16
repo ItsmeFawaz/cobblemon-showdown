@@ -16,13 +16,15 @@ export const Rulesets: {[k: string]: FormatData} = {
 		 */
 		onBegin() {
 			if (this.gameType !== 'raid') return;
-			// Use the same Object.assign pattern as format.battle in custom-formats.ts so
-			// the override is typed via ModdedBattleScriptsData rather than AnyObject.
+			// Override checkWin while maintaining type safety via ModdedBattleScriptsData.
 			Object.assign(this, {
 				checkWin(this: Battle) {
+					// Boss side has exactly 1 active slot; challenger side has 5.
+					const bossSide = this.sides.find(s => s.active.length === 1);
+					const challengerSide = this.sides.find(s => s.active.length > 1);
 					// Challengers win immediately if the boss faints.
-					if (!this.sides[0].pokemonLeft) {
-						this.win(this.sides[1]);
+					if (bossSide && !bossSide.pokemonLeft) {
+						this.win(challengerSide!);
 						return true as const;
 					}
 					// Challenger faint/revive is handled by onResidual; suppress the
@@ -43,22 +45,26 @@ export const Rulesets: {[k: string]: FormatData} = {
 		onBeforeTurn(pokemon: Pokemon) {
 			if (this.gameType !== 'raid') return;
 
+			// The boss side has exactly 1 active slot; challengers have 5.
+			const isBoss = pokemon.side.active.length === 1;
+
 			// Reset the end-of-round guard when we see the boss's BeforeTurn event.
-			if (pokemon.side.n === 0) {
+			if (isBoss) {
 				(this.formatData as AnyObject).raidResidualDone = false;
 			}
 
 			// Only inject extra moves for the boss Pokémon.
-			if (pokemon.side.n !== 0) return;
+			if (!isBoss) return;
 			if (pokemon.fainted || !pokemon.hp) return;
 
-			const playerActives = this.sides[1].active.filter(
+			const challengerSide = this.sides.find(s => s.active.length > 1)!;
+			const playerActives = challengerSide.active.filter(
 				(p): p is Pokemon => !!(p && !p.fainted && p.hp)
 			);
 			if (!playerActives.length) return;
 
 			// Add 1–3 extra boss moves so the boss uses 2–4 moves per round total.
-			// this.random(1, 4) returns an integer in [1, 4) → 1, 2, or 3 extra moves.
+			// this.random(1, 4) returns 1, 2, or 3.
 			const extraCount = this.random(1, 4);
 			for (let i = 0; i < extraCount; i++) {
 				const validMoves = pokemon.moveSlots.filter(slot => slot.pp > 0);
@@ -94,8 +100,9 @@ export const Rulesets: {[k: string]: FormatData} = {
 			if ((this.formatData as AnyObject).raidResidualDone) return;
 			(this.formatData as AnyObject).raidResidualDone = true;
 
-			const bossSide = this.sides[0];
-			const playerSide = this.sides[1];
+			// Boss side has 1 active slot; challenger side has 5.
+			const bossSide = this.sides.find(s => s.active.length === 1)!;
+			const playerSide = this.sides.find(s => s.active.length > 1)!;
 			const boss = bossSide.active[0];
 
 			// --- 1 & 2: Status / negative-boost reset on the boss ---
