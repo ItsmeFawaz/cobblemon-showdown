@@ -51,4 +51,25 @@ export const Formats: FormatList = [
 		ruleset: [],
 		gameType: "freeforall"
 	},
+	// N-Player Free for All formats: each player controls one active Pokémon.
+	// playerCount controls how many participants join (choices sent as "p1 move 1", "p2 move 1", etc.).
+	// Add additional entries here with different playerCount values as needed.
+	{
+		name: "Cobblemon 5-Player Free for All",
+		threads: [],
+
+		mod: 'cobblemon',
+		ruleset: [],
+		gameType: "freeforall",
+		playerCount: 5,
+	},
+	{
+		name: "Cobblemon 6-Player Free for All",
+		threads: [],
+
+		mod: 'cobblemon',
+		ruleset: [],
+		gameType: "freeforall",
+		playerCount: 6,
+	},
 ];

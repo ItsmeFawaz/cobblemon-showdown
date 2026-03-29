@@ -520,6 +520,11 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 	p2: RoomBattlePlayer = null!;
 	p3: RoomBattlePlayer = null!;
 	p4: RoomBattlePlayer = null!;
+	p5: RoomBattlePlayer = null!;
+	p6: RoomBattlePlayer = null!;
+	p7: RoomBattlePlayer = null!;
+	p8: RoomBattlePlayer = null!;
+	p9: RoomBattlePlayer = null!;
 	inviteOnlySetter: ID | null = null;
 	logData: AnyObject | null = null;
 	endType: 'forfeit' | 'forced' | 'normal' = 'normal';
@@ -1244,6 +1249,11 @@ export class RoomBattle extends RoomGame<RoomBattlePlayer> {
 		this.p2 = null!;
 		this.p3 = null!;
 		this.p4 = null!;
+		this.p5 = null!;
+		this.p6 = null!;
+		this.p7 = null!;
+		this.p8 = null!;
+		this.p9 = null!;
 
 		void this.stream.destroy();
 		if (this.active) {

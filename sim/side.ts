@@ -107,7 +107,7 @@ export class Side {
 		if (sideScripts) Object.assign(this, sideScripts);
 
 		this.battle = battle;
-		this.id = ['p1', 'p2', 'p3', 'p4'][sideNum] as SideID;
+		this.id = `p${sideNum + 1}` as SideID;
 		this.n = sideNum;
 
 		this.name = name;

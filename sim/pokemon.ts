@@ -344,10 +344,10 @@ export class Pokemon {
 			this.baseMoveSlots.push({
 				move: move.name,
 				id: move.id,
-				// COBBLED: Apply move pp
-				pp: set.movesInfo[i].pp,
+				// COBBLED: Apply move pp, fall back to computed basepp if movesInfo is absent
+				pp: set.movesInfo?.[i]?.pp ?? basepp,
 				// COBBLED: Apply
-				maxpp: set.movesInfo[i].maxPp,
+				maxpp: set.movesInfo?.[i]?.maxPp ?? basepp,
 				target: move.target,
 				disabled: false,
 				disabledSource: '',

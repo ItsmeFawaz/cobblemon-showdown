@@ -129,6 +129,11 @@ export class BattleStream extends Streams.ObjectReadWriteStream<string> {
 		case 'p2':
 		case 'p3':
 		case 'p4':
+		case 'p5':
+		case 'p6':
+		case 'p7':
+		case 'p8':
+		case 'p9':
 			if (message === 'undo') {
 				this.battle!.undoChoice(type);
 			} else {
@@ -296,19 +301,49 @@ export function getPlayerStreams(stream: BattleStream) {
 				void stream.write(data.replace(/(^|\n)/g, `$1>p4 `));
 			},
 		}),
+		p5: new Streams.ObjectReadWriteStream({
+			write(data: string) {
+				void stream.write(data.replace(/(^|\n)/g, `$1>p5 `));
+			},
+		}),
+		p6: new Streams.ObjectReadWriteStream({
+			write(data: string) {
+				void stream.write(data.replace(/(^|\n)/g, `$1>p6 `));
+			},
+		}),
+		p7: new Streams.ObjectReadWriteStream({
+			write(data: string) {
+				void stream.write(data.replace(/(^|\n)/g, `$1>p7 `));
+			},
+		}),
+		p8: new Streams.ObjectReadWriteStream({
+			write(data: string) {
+				void stream.write(data.replace(/(^|\n)/g, `$1>p8 `));
+			},
+		}),
+		p9: new Streams.ObjectReadWriteStream({
+			write(data: string) {
+				void stream.write(data.replace(/(^|\n)/g, `$1>p9 `));
+			},
+		}),
 	};
 	(async () => {
 		for await (const chunk of stream) {
 			const [type, data] = splitFirst(chunk, `\n`);
 			switch (type) {
 			case 'update':
-				const channelMessages = extractChannelMessages(data, [-1, 0, 1, 2, 3, 4]);
+				const channelMessages = extractChannelMessages(data, [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 				streams.omniscient.push(channelMessages[-1].join('\n'));
 				streams.spectator.push(channelMessages[0].join('\n'));
 				streams.p1.push(channelMessages[1].join('\n'));
 				streams.p2.push(channelMessages[2].join('\n'));
 				streams.p3.push(channelMessages[3].join('\n'));
 				streams.p4.push(channelMessages[4].join('\n'));
+				streams.p5.push(channelMessages[5].join('\n'));
+				streams.p6.push(channelMessages[6].join('\n'));
+				streams.p7.push(channelMessages[7].join('\n'));
+				streams.p8.push(channelMessages[8].join('\n'));
+				streams.p9.push(channelMessages[9].join('\n'));
 				break;
 			case 'sideupdate':
 				const [side, sideData] = splitFirst(data, `\n`);
