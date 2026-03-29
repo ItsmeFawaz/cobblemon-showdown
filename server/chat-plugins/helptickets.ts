@@ -90,7 +90,7 @@ interface BattleInfo {
 	log: string[];
 	url: string;
 	title: string;
-	players: {p1: ID, p2: ID, p3?: ID, p4?: ID};
+	players: {p1: ID, p2: ID, p3?: ID, p4?: ID, p5?: ID, p6?: ID, p7?: ID, p8?: ID, p9?: ID};
 	pokemon: Record<string, {species: string, name?: string}[]>;
 }
 

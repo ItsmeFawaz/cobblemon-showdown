@@ -28,14 +28,15 @@ import {Utils} from '../lib';
 import {Cobblemon} from './cobblemon/cobblemon';
 declare const __version: any;
 
-export type ChannelID = 0 | 1 | 2 | 3 | 4;
+export type ChannelID = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export type ChannelMessages<T extends ChannelID | -1> = Record<T, string[]>;
 
-const splitRegex = /^\|split\|p([1234])\n(.*)\n(.*)|.+/gm;
+const splitRegex = /^\|split\|p([1-9])\n(.*)\n(.*)|.+/gm;
 
 export function extractChannelMessages<T extends ChannelID | -1>(message: string, channelIds: T[]): ChannelMessages<T> {
 	const channelIdSet = new Set(channelIds);
+	// Pre-initialize all channels so that accessing an unrequested channel returns an empty array.
 	const channelMessages: ChannelMessages<ChannelID | -1> = {
 		[-1]: [],
 		0: [],
@@ -43,6 +44,11 @@ export function extractChannelMessages<T extends ChannelID | -1>(message: string
 		2: [],
 		3: [],
 		4: [],
+		5: [],
+		6: [],
+		7: [],
+		8: [],
+		9: [],
 	};
 
 	for (const [lineMatch, playerMatch, secretMessage, sharedMessage] of message.matchAll(splitRegex)) {
@@ -73,6 +79,11 @@ interface BattleOptions {
 	p2?: PlayerOptions; // Player 2 data
 	p3?: PlayerOptions; // Player 3 data
 	p4?: PlayerOptions; // Player 4 data
+	p5?: PlayerOptions; // Player 5 data
+	p6?: PlayerOptions; // Player 6 data
+	p7?: PlayerOptions; // Player 7 data
+	p8?: PlayerOptions; // Player 8 data
+	p9?: PlayerOptions; // Player 9 data
 	debug?: boolean; // show debug mode option
 	forceRandomChance?: boolean; // force Battle#randomChance to always return true or false (used in some tests)
 	deserialized?: boolean;
@@ -125,7 +136,7 @@ export class Battle {
 	 */
 	readonly activePerHalf: 1 | 2 | 3;
 	readonly field: Field;
-	readonly sides: [Side, Side] | [Side, Side, Side, Side];
+	readonly sides: Side[];
 	readonly prngSeed: PRNGSeed;
 	dex: ModdedDex;
 	gen: number;
@@ -316,7 +327,7 @@ export class Battle {
 			}
 		}
 
-		const sides: SideID[] = ['p1', 'p2', 'p3', 'p4'];
+		const sides: SideID[] = Array.from({length: this.sides.length}, (_, i) => `p${i + 1}` as SideID);
 		for (const side of sides) {
 			if (options[side]) {
 				this.setPlayer(side, options[side]!);
@@ -346,6 +357,26 @@ export class Battle {
 
 	get p4() {
 		return this.sides[3];
+	}
+
+	get p5() {
+		return this.sides[4];
+	}
+
+	get p6() {
+		return this.sides[5];
+	}
+
+	get p7() {
+		return this.sides[6];
+	}
+
+	get p8() {
+		return this.sides[7];
+	}
+
+	get p9() {
+		return this.sides[8];
 	}
 
 	toString() {
@@ -1791,8 +1822,14 @@ export class Battle {
 			this.sides[1].foe = this.sides[0];
 			this.sides[0].foe = this.sides[1];
 			if (this.sides.length > 2) { // ffa
-				this.sides[2]!.foe = this.sides[3]!;
-				this.sides[3]!.foe = this.sides[2]!;
+				// For N-player freeforall, set each side's foe to the next side in a ring
+				// within the extra sides (sides[2..N-1]).
+				// foePokemonLeft() and foes() for freeforall ignore this and check all other sides,
+				// but foe must be a valid side reference.
+				const extraCount = this.sides.length - 2;
+				for (let i = 2; i < this.sides.length; i++) {
+					this.sides[i]!.foe = this.sides[2 + ((i - 2 + 1) % extraCount)]!;
+				}
 			}
 		}
 
@@ -2495,13 +2532,15 @@ export class Battle {
 	checkWin(faintData?: Battle['faintQueue'][0]) {
 		let team1PokemonLeft = this.sides[0].pokemonLeft;
 		let team2PokemonLeft = this.sides[1].pokemonLeft;
-		const team3PokemonLeft = this.gameType === 'freeforall' && this.sides[2]!.pokemonLeft;
-		const team4PokemonLeft = this.gameType === 'freeforall' && this.sides[3]!.pokemonLeft;
 		if (this.gameType === 'multi') {
 			team1PokemonLeft += this.sides[2]!.pokemonLeft;
 			team2PokemonLeft += this.sides[3]!.pokemonLeft;
 		}
-		if (!team1PokemonLeft && !team2PokemonLeft && !team3PokemonLeft && !team4PokemonLeft) {
+		// Check if all sides have no pokemon left (simultaneous faint / tie)
+		const allFainted = this.gameType === 'freeforall'
+			? this.sides.every(side => !side.pokemonLeft)
+			: !team1PokemonLeft && !team2PokemonLeft;
+		if (allFainted) {
 			this.win(faintData && this.gen > 4 ? faintData.target.side : null);
 			return true;
 		}
@@ -3204,32 +3243,16 @@ export class Battle {
 		this.sentLogPos = this.log.length;
 
 		if (!this.sentEnd && this.ended) {
-			const log = {
+			const log: AnyObject = {
 				winner: this.winner,
 				seed: this.prngSeed,
 				turns: this.turn,
-				p1: this.sides[0].name,
-				p2: this.sides[1].name,
-				p3: this.sides[2] && this.sides[2].name,
-				p4: this.sides[3] && this.sides[3].name,
-				p1team: this.sides[0].team,
-				p2team: this.sides[1].team,
-				p3team: this.sides[2] && this.sides[2].team,
-				p4team: this.sides[3] && this.sides[3].team,
-				score: [this.sides[0].pokemonLeft, this.sides[1].pokemonLeft],
+				score: this.sides.map(side => side.pokemonLeft),
 				inputLog: this.inputLog,
 			};
-			if (this.sides[2]) {
-				log.score.push(this.sides[2].pokemonLeft);
-			} else {
-				delete log.p3;
-				delete log.p3team;
-			}
-			if (this.sides[3]) {
-				log.score.push(this.sides[3].pokemonLeft);
-			} else {
-				delete log.p4;
-				delete log.p4team;
+			for (const [i, side] of this.sides.entries()) {
+				log[`p${i + 1}`] = side.name;
+				log[`p${i + 1}team`] = side.team;
 			}
 			this.send('end', JSON.stringify(log));
 			this.sentEnd = true;

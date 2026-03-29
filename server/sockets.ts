@@ -250,11 +250,11 @@ export class ServerStream extends Streams.ObjectReadWriteStream<string> {
 			const room = this.rooms.get(roomid);
 			if (!room) return;
 
-			const messages: [string | null, string | null, string | null, string | null, string | null] = [
-				null, null, null, null, null,
+			const messages: (string | null)[] = [
+				null, null, null, null, null, null, null, null, null, null,
 			];
 			const message = data.substr(nlLoc + 1);
-			const channelMessages = extractChannelMessages(message, [0, 1, 2, 3, 4]);
+			const channelMessages = extractChannelMessages(message, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 			const roomChannel = this.roomChannels.get(roomid);
 			for (const [curSocketid, curSocket] of room) {
 				const channelid = roomChannel?.get(curSocketid) || 0;
