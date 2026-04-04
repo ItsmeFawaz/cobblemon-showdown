@@ -128,6 +128,11 @@ export class Side {
 		case 'triples': case 'rotation':
 			this.active = [null!, null!, null!];
 			break;
+		case 'raid':
+			// The boss brings exactly 1 Pokémon; the challenger side brings 5.
+			// Detect by team size so the boss can be either p1 or p2.
+			this.active = new Array(team.length === 1 ? 1 : 5).fill(null!) as Pokemon[];
+			break;
 		default:
 			this.active = [null!];
 		}
