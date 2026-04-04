@@ -160,6 +160,7 @@ export const Rulesets: {[k: string]: FormatData} = {
 				player.fainted = false;
 				player.faintQueued = false;
 				player.subFainted = false;
+				player.isActive = true;
 				player.setStatus('');
 				player.hp = player.maxhp;
 				player.clearVolatile();
